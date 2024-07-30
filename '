@@ -15,11 +15,10 @@ import com.velocitypowered.api.proxy.server.RegisteredServer;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.util.Optional;
 
 public class ServerChangeListener {
 
-    @Subscribe(order = PostOrder.LAST)
+    @Subscribe(order = PostOrder.FIRST)
     public void onPlayerChat(ServerPreConnectEvent event) throws IOException {
         Player player = event.getPlayer();
 
@@ -39,18 +38,18 @@ public class ServerChangeListener {
 
         }
         
-        Optional<RegisteredServer> result = event.getResult().getServer();
+        ServerResult result = event.getResult();
 
-        if (result.isPresent()) {
-            out.writeUTF(result.get().getServerInfo().getName());
+        if (result != null) {
+            out.writeUTF(event.getResult().getServer().getServerInfo().getName());
         } else {
             out.writeUTF("NULLServer");
         }
 
         for (RegisteredServer server : BetterMessages.getInstance().getServer().getAllServers()) {
-            //if (!server.getPlayersConnected().isEmpty()) {
+            if (!server.getPlayersConnected().isEmpty()) {
                 server.sendPluginMessage(MinecraftChannelIdentifier.from("bettermessages:main"), b.toByteArray());
-            //}
+            }
         }
 //        BetterMessages.getInstance().getServer().getServer(player.getCurrentServer().get().getServerInfo().getName()).get().sendPluginMessage(MinecraftChannelIdentifier.from("bettermessages:main"), b.toByteArray());
     }
